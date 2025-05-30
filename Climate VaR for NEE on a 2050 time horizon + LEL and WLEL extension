@@ -1,0 +1,68 @@
+' === NGFS Scenario Market % Changes (2050) === matrix(6,1) market_chg_2050
+'===ClimateVaR+MC+ LEL/WLEL === matrix(6,6) results_nee !simulations = 10000
+for!i=1to6 !market_chg =
+market_chg_2050(!i) / 100 !nee_ret = nee_beta *
+!market_chg
+!mu = !nee_ret
+!sigma = @stdev(return_nee)
+matrix(!simulations,1) mc for !j = 1 to !simulations
+market_chg_2050(1) Baseline market_chg_2050(2) Below2C market_chg_2050(3) Delayed Transition market_chg_2050(4) Fragmented World market_chg_2050(5) NDCs market_chg_2050(6) NetZero2050
+= 100.59
+= 84.36 '
+'--------------NEE-------------- --------------
+' === Prepare Returns & CAPM === series rf_daily = CLOSE__IRX / 100 / 252
+if @mean(return_nee) > 1 then series return_nee =
+return_nee / 100
+endif
+if @mean(SP500_RET) > 1 then
+series SP500_RET = SP500_RET / 100
+endif
+series excess_nee = return_nee - rf_daily
+series excess_mkt = SP500_RET - rf_daily
+equation capm_eq_nee.ls excess_nee c excess_mkt scalar nee_beta = capm_eq_nee.@coefs(2)
+mc(!j,1) = !mu + !sigma next
+!mc_var95 = @quantile(mc, 0.05)
+!mc_var99 = @quantile(mc, 0.01)
+!sum_tail = 0
+!count_tail = 0 for!j=1to !simulations
+if mc(!j,1) <= !mc_var99
+then
+!sum_tail = !sum_tail + mc(!j,1)
+!count_tail = !count_tail + 1
+endif next
+!lel_val = (!sum_tail / !count_tail) * 100
+!weighted_sum = 0 !weight_total = 0
+= 93.81
+= 88.76
+= 91.40
+= 86.72 '
+'
+' ' '
+* @nrnd
+49
+for !j = 1 to !simulations if mc(!j,1) <= !mc_var99
+then
+!w = @abs(mc(!j,1))^2
+!weighted_sum = !weighted_sum + (!w * mc(!j,1))
+!weight_total =
+climate_summary_nee(1,2) = "Climate VaR (%)" climate_summary_nee(1,3) = "Expected Return (%)" climate_summary_nee(1,4) = "LEL (%)"
+climate_summary_nee(1,5) = "MC VaR 95%" climate_summary_nee(1,6) = "MC VaR 99%" climate_summary_nee(1,7) = "WLEL (%)"
+climate_summary_nee(2,1) = "Baseline" climate_summary_nee(3,1) = "Below2C" climate_summary_nee(4,1) = "Delayed Transition" climate_summary_nee(5,1) = "Fragmented World" climate_summary_nee(6,1) = "NDCs" climate_summary_nee(7,1) = "NetZero2050"
+for!i=1to6 for !j = 1 to 6
+climate_summary_nee(!i+1,!j+1) = results_nee(!i,!j)
+next next
+climate_summary_nee.setformat(B: G) f.2
+show climate_summary_nee
+!weight_total endif
+next
++!w
+!wlel_val !weight_total) * 100
+results_nee(!i,1) = !nee_ret * 100 ' Now this is Climate VaR (%)
+results_nee(!i,2) = !mu * 100 ' Redundant but kept for clarity
+results_nee(!i,3) = !lel_val
+results_nee(!i,4) = !mc_var95 * 100
+results_nee(!i,5) = !mc_var99 * 100
+results_nee(!i,6) = !wlel_val
+delete mc next
+' === Display NEE Results Table ===
+table(7,7) climate_summary_nee climate_summary_nee(1,1) = "Scenario"
