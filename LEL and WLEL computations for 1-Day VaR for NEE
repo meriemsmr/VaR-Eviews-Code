@@ -1,0 +1,53 @@
+'=============================== =====
+' LEL & WLEL CALCULATIONS DAILY NEE VAR '=============================== =====
+' === Historical VaR === series nee_lel_hist_95_1day = @recode(return_nee < nee_histvar5_1day, return_nee, NA)
+series nee_lel_hist_99_1day = @recode(return_nee <
+nee_histvar1_1day, return_nee, NA)
+scalar nee_lel_hist_95_val_1day = @mean(nee_lel_hist_95_1day) scalar nee_lel_hist_99_val_1day = @mean(nee_lel_hist_99_1day) scalar nee_wlel_hist_95_val_1day =0.05* nee_lel_hist_95_val_1day
+scalar nee_wlel_hist_99_val_1day = 0.01 * nee_lel_hist_99_val_1day
+"95% "99%
+42
+ ' === Parametric (Normal) VaR ===
+scalar nee_std_daily = @stdev(return_nee)
+scalar nee_lel_param_95_val_1day = @dnorm(nee_varsimple5_1day)/0.05 * nee_std_daily
+scalar nee_lel_param_99_val_1day = @dnorm(nee_varsimple1_1day)/0.01 * nee_std_daily
+scalar nee_wlel_param_95_val_1day = 0.05 * nee_lel_param_95_val_1day scalar nee_wlel_param_99_val_1day = 0.01 * nee_lel_param_99_val_1day
+' === GARCH VaR ===
+series nee_lel_garch_95_1day = @recode(return_nee < nee_garchvar5_1day, return_nee, NA)
+series nee_lel_garch_99_1day = @recode(return_nee < nee_garchvar1_1day, return_nee, NA)
+scalar nee_lel_garch_95_val_1day = @mean(nee_lel_garch_95_1day) scalar nee_lel_garch_99_val_1day = @mean(nee_lel_garch_99_1day) scalar nee_wlel_garch_95_val_1day = 0.05 * nee_lel_garch_95_val_1day scalar nee_wlel_garch_99_val_1day = 0.01 * nee_lel_garch_99_val_1day
+' === EGARCH VaR ===
+series nee_lel_egarch_95_1day = @recode(return_nee < nee_egarchvar5_1day, return_nee, NA)
+series nee_lel_egarch_99_1day = @recode(return_nee < nee_egarchvar1_1day, return_nee, NA)
+scalar nee_lel_egarch_95_val_1day = @mean(nee_lel_egarch_95_1day) scalar nee_lel_egarch_99_val_1day = @mean(nee_lel_egarch_99_1day) scalar nee_wlel_egarch_95_val_1day = 0.05 * nee_lel_egarch_95_val_1day scalar nee_wlel_egarch_99_val_1day = 0.01 * nee_lel_egarch_99_val_1day
+' === Monte Carlo LEL (if available) ===
+' Assuming mcvar2_1 and mcvar1_1 are stored daily Monte Carlo LEL values
+scalar
+mcvar2
+scalar
+mcvar1
+scalar
+0.05 *
+scalar
+0.01 *
+' ================================ ==============
+mc_lel_95_val_1day = mc_lel_99_val_1day =
+mc_wlel_95_val_1day = mc_lel_95_val_1day mc_wlel_99_val_1day = mc_lel_99_val_1day
+43
+
+' Create Daily LEL and WLEL Results Table (1-Day Horizon)
+' ================================ ==============
+table(6,5) nee_lel_results_1day nee_lel_results_1day.setwidth(A) 15
+nee_lel_results_1day(1,1) = "Method" nee_lel_results_1day(1,2) = 95%"
+nee_lel_results_1day(3,4) = nee_lel_hist_99_val_1day nee_lel_results_1day(3,5) = nee_wlel_hist_99_val_1day
+nee_lel_results_1day(4,1) = "GARCH" nee_lel_results_1day(4,2) = nee_lel_garch_95_val_1day nee_lel_results_1day(4,3) = nee_wlel_garch_95_val_1day nee_lel_results_1day(4,4) = nee_lel_garch_99_val_1day nee_lel_results_1day(4,5) = nee_wlel_garch_99_val_1day
+nee_lel_results_1day(5,1) = "EGARCH" nee_lel_results_1day(5,2) = nee_lel_egarch_95_val_1day nee_lel_results_1day(5,3) = nee_wlel_egarch_95_val_1day nee_lel_results_1day(5,4) = nee_lel_egarch_99_val_1day nee_lel_results_1day(5,5) = nee_wlel_egarch_99_val_1day
+nee_lel_results_1day(6,1) = "Monte Carlo" nee_lel_results_1day(6,2) = mc_lel_95_val_1day nee_lel_results_1day(6,3) = mc_wlel_95_val_1day nee_lel_results_1day(6,4) = mc_lel_99_val_1day nee_lel_results_1day(6,5) = mc_wlel_99_val_1day
+show nee_lel_results_1day
+nee_lel_results_1day(1,3) = "WLEL 95%" nee_lel_results_1day(1,4) = 99%" nee_lel_results_1day(1,5) = "WLEL 99%"
+nee_lel_results_1day(2,1) = "Parametric" nee_lel_results_1day(2,2) = nee_lel_param_95_val_1day nee_lel_results_1day(2,3) = nee_wlel_param_95_val_1day nee_lel_results_1day(2,4) = nee_lel_param_99_val_1day nee_lel_results_1day(2,5) nee_wlel_param_99_val_1day
+"LEL
+"LEL
+nee_lel_results_1day(3,1) "Historical" nee_lel_results_1day(3,2) nee_lel_hist_95_val_1day nee_lel_results_1day(3,3) nee_wlel_hist_95_val_1day
+=
+= = =
