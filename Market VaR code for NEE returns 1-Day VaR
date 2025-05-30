@@ -1,0 +1,28 @@
+' ================================ ===
+' DAILY MARKET VaR CALCULATIONS FOR NEE
+' Includes: Parametric, Historical, GARCH, EGARCH
+' 1-day horizon at 95% and 99% levels
+' ================================ =====
+smpl 1/1/2000 2/26/2025
+' 1. PARAMETRIC (NORMAL) VaR scalar nee_varsimple5_1day = @qnorm(0.05) ' = -1.644854 scalar nee_varsimple1_1day = @qnorm(0.01) ' = -2.326348
+' 2. HISTORICAL VaR
+scalar nee_histvar5_1day = @quantile(return_nee, 0.05) ' = -0.019418
+scalar nee_histvar1_1day = @quantile(return_nee, 0.01) ' = -0.038657
+' 3. GARCH(1,1) with t-dist (df=5)
+equation nee_garch_eq.arch(m=1, dist=5) return_nee c
+scalar nee_garch_sigma_1day = 0.0002608497612071911
+scalar nee_garchvar5_1day = @qtdist(0.05, 5)*@sqrt(nee_garch_sigma_1day) ' = -0.000526
+scalar nee_garchvar1_1day = @qtdist(0.01, 5)*@sqrt(nee_garch_sigma_1day) ' = -0.000878
+' 4. EGARCH with t-dist (df=5) scalar nee_egarchvar5_1day = -0.256126
+scalar nee_egarchvar1_1day = -0.256126
+41
+' Create results table table(5,3) nee_daily_results nee_daily_results.setwidth(A) 15 nee_daily_results(1,1) = "Method"
+nee_daily_results(1,2) =
+VaR"
+nee_daily_results(1,3) =
+VaR"
+nee_daily_results(2,1) = "Parametric" nee_daily_results(2,2) = nee_varsimple5_1day nee_daily_results(2,3) = nee_varsimple1_1day
+nee_daily_results(3,1) = "Historical" nee_daily_results(3,2) = nee_histvar5_1day nee_daily_results(3,3) = nee_histvar1_1day
+nee_daily_results(4,1) = "GARCH" nee_daily_results(4,2) = nee_garchvar5_1day nee_daily_results(4,3) = nee_garchvar1_1day
+nee_daily_results(5,1) = "EGARCH" nee_daily_results(5,2) = nee_egarchvar5_1day nee_daily_results(5,3) = nee_egarchvar1_1day
+' Display results show nee_daily_results
