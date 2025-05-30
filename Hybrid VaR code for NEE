@@ -1,0 +1,61 @@
+' ------------------------------- ' NEE Regime-Switching Hybrid VaR (Climate shock hits in 15% of cases)
+' -------------------------------
+!simulations = 10000 !climate_prob = 0.15 ' 15% chance of climate stress scalar beta_nee = nee_beta
+matrix(6,5) regime_results matrix(6,1) market_chg_2050
+' Random climate regime activation
+!shock_trigger = @rnd
+if !shock_trigger <= !climate_prob then
+hybrid_returns(!i,1) = !mkt_ret + !climate_shock
+else hybrid_returns(!i,1)
+= !mkt_ret endif
+next
+' VaR, LEL, WLEL
+!var95 = @quantile(hybrid_returns, 0.05) * 100
+!var99 = @quantile(hybrid_returns, 0.01) * 100
+!sum_tail = 0 !count_tail = 0 !weighted_sum =0 !weight_total =0
+for!i=1to !simulations !r =
+hybrid_returns(!i,1)
+if !r <= (!var99/100)
+market_chg_2050(1) Baseline market_chg_2050(2) Below2C market_chg_2050(3) Delayed Transition market_chg_2050(4) Fragmented World market_chg_2050(5) NDCs market_chg_2050(6) NetZero2050
+= 100.59
+= 84.36
+= 93.81 '
+for !s = 1 to 6 !climate_shock
+then !sum_tail + !count_tail
+= beta_nee (market_chg_2050(!s) / 100)
+!sum_tail = !r !count_tail = + 1
+!w = @abs(!r)^2
+matrix(!simulations,1) hybrid_returns
+for !i = 1 to !simulations ' Simulate market return !mkt_ret =
+@mean(return_nee) + @stdev(return_nee) * @nrnd
+!weighted_sum = !weighted_sum + (!w * !r)
+!weight_total = !weight_total + !w
+endif
+= 88.76
+= 91.40
+= 86.72
+' ' '
+*
+' '
+51
+next regime_table(1,5) = regime_table(1,6) =
+"LEL (%)" "WLEL (%)"
+"Baseline" "Below2C" "Delayed
+"Fragmented "NDCs"
+!lel = (!sum_tail / !count_tail) * 100
+!wlel = (!weighted_sum / !weight_total) * 100
+regime_results(!s,1) = !climate_shock * 100
+regime_table(2,1) = regime_table(3,1) = regime_table(4,1) = Transition" regime_table(5,1) = World" regime_table(6,1) =
+regime_results(!s,2) =
+!var95 regime_table(7,1) =
+regime_results(!s,3) = !var99
+regime_results(!s,4) = !lel
+regime_results(!s,5) = !wlel next
+' Display regime results table table(7,6) regime_table ' Modified to display 6 rows including Baseline regime_table(1,1) = "Scenario" regime_table(1,2) = "Climate Shift (%)"
+regime_table(1,3) = "Hybrid VaR 95%"
+regime_table(1,4) = "Hybrid VaR 99%"
+"NetZero2050"
+for !i = 1 to 6 for !j = 1 to 5
+regime_table(!i+1,!j+1) = regime_results(!i,!j)
+next next
+regime_table.setformat(B:F) f.2 show regime_table
